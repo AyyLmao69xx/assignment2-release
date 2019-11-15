@@ -27,6 +27,6 @@ auto VelocityKinematic::acceleration_callback(
 
 auto VelocityKinematic::velocity_callback() -> void
 {
-    // TODO(STUDENT): CODE HERE
+		
 }
 } // namespace assignment2

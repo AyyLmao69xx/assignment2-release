@@ -6,6 +6,7 @@ import launch_ros.actions
 from ament_index_python.packages import get_package_share_directory
 
 package_name = "assignment2"
+game_master_namespace = "/z0000000"
 
 rviz2_config =  os.path.join(
         get_package_share_directory(package_name),
@@ -22,5 +23,6 @@ def generate_launch_description():
             node_executable="rviz2",
             output="screen",
             arguments = [rviz2_launch_param],
+            node_namespace = game_master_namespace,
         ),
     ])

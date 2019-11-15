@@ -17,7 +17,7 @@ After the repository was created, you must do the following:
 
 **Note: failing to do the above will result you getting 0 marks for the assignment.**
 
-`mtrn2500_ws` in the provided MTRN2500 virtual machine is the recommended location for you to clone the git repository.
+`mtrn2500_ws` in the provided MTRN2500 virtual machine is the recommanded location for you to clone the git repository.
 
 Demonstration will be during your tutorial in week 9 (note this is one week later than advised in the course outline). Students in the Monday tutorial will demonstrate in week 10 due to the public holiday. 
 
@@ -25,7 +25,7 @@ Code style submission is due at 5pm Friday week 9 (15 November 2019).
 
 For the style task, create a pull request of your commit from the `master` branch to `review` branch. Your demonstrator will do a code review on your pull request. Your demonstrator can give early feedback if you create the pull request and ask your demonstrator to review it in your lab session. 
 
-Final assessment of the style task will be be based on the pull request to `review` from the last commit to the `master` branch before the code style submission due date.
+Final assessment of the style task will be be based on the last commit to the Master branch before the code style submission due date.
 
 
 ## Useful Information
@@ -96,7 +96,7 @@ Here we have the main portion of this example - defining the lambda function. We
 * `(const double& value)`: the input arguments to this function, where the chosen algorithm (which is `std::for_each` in this case) passes each value between the start and end iterators
 * `{ ... }`: the contents of the function
 
-The parameters which are captured (the first section `[ ... ]`) declare which variables that exist in the scope that this lambda function is defined in which are to be passed to the lambda function. If the `&` was omitted, the parameter would be copied and the copy is passed to the lambda function. With the `&`, a reference to the original parameter is created and the reference is passed in to the lambda function. The lambda function can also store the `this` pointer by value using the syntex `[this]`
+The parameters which are captured (the first section `[ ... ]`) declare which variables that exist in the scope that this lambda function is defined in which are to be passed to the lambda function. If the `&` was omitted, the parameter would be copied and the copy is passed to the lambda function. With the `&`, a reference to the original parameter is created and the reference is passed in to the lambda function.
 
 ```cpp
   std::cout << "Largest value is: " << maxValue << std::endl;
@@ -112,7 +112,7 @@ An introduction to ROS and the purpose behind it can be found in the Week 5 Tuto
 ROS organises all user-written software in a specific way. All libraries and executables are organised into separate packages which each represent a specific area of functionality. For example: given a bipedal humanoid robot, one would organise a package that deals purely with moving the limbs of the robot. Another would deal purely with camera input. Another would deal with high-level movement planning logic, etc. 
 
 ### Nodes
-Given that packages are libraries and executables that are represent specific areas of functionality, nodes can be understood as specific tasks that are undergone to perform some processing, communication or visualisation. The nodes are the final executables which are orchestrated by ROS so that they can communicate between each other. There can be multiple ROS nodes in a single ROS package.
+Given that packages are libraries and executables that are represent specific areas of funtionality, nodes can be understood as specific tasks that are undergone to perform some processing, communication or visualisation. The nodes are the final executables which are orchestrated by ROS so that they can communicate between each other. There can be multiple ROS nodes in a single ROS package.
 
 To create a node, you must first create a class which you wish to use to conceptually represent the node. Consider the example where you wish to write a node called `ColourImageProcessing_node` through the `ColorImageProcessing` class which performs colour image processing in a camera processing package. You can specify that you wish to have that class be a node in the following way:
 
@@ -123,23 +123,21 @@ class ColorImageProcessing : public rclcpp::Node {
 ```
 
 ### Topics
-Topics are the main method of communicating between ROS packages. You can think of topics as channels of communication between nodes. ROS nodes can not only be run on a single machine (as you will be facilitating in this assignment), but they can also be run on multiple machines in a distributed fashion. ROS handles the networking and communication portion of this through these topics. They work using a Publisher / Subscriber model. This means that any node which subscribes to a particular topic will receive a message sent by a node which publishes to the same topic.
+Topics are the main method of communicating between ROS packages. You can think of topics as channels of communication between nodes. ROS nodes can not only be run on a single machine (as you will be facilitating in this assignment), but they can also be run on multiple machines in a distributed fashion. ROS handles the networking and communication portion of this through these topics. They work using a Publisher / Subcriber model. This means that any node which subscribes to a particular topic will receive a message sent by a node which publishes to the same topic.
 
 **FUN FACT:** Nodes can both publish and subscribe to multiple topics all at the same time.
 
 ### Subscribers
 In order for a node to receive information from another node, they must first subscribe to a topic. There are three pieces of information required to allow a node to subscribe to a topic. These are:
 * topic name (string naming the topic being subscribed to)
-* queue length (unsigned integer representing the amount of messages that can be stored in the message cue before the node refuses to accept any further messages through this subscription) 
+* queue length (unsigned integer representing the amount of messages that can be stored in the message cue before the node refuses to accept any further mekssages through this subscription) 
 * callback (a function pointer for a function that is run when a new message is received on the subscribed topic)
 
 Here is an example of how to create one:
 ```cpp
 class Example : public rclcpp::Node {
-  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr example_subscriber_;
-  
   Example() : rclcpp::Node{std::string{"Example_node"}} {
-    this->example_subscriber_ = create_subscription<sensor_msgs::msg::Joy>(
+    auto exampleSubscriber_ = create_subscription<sensor_msgs::msg::Joy>(
                                 std::string("topic"),
                                 10,
                                 [this](sensor_msgs::msg::Joy::UniquePtr joy_message){
@@ -154,37 +152,31 @@ class Example : public rclcpp::Node {
 Or, if you would prefer to implement your callback in a separate function without using a lambda function:
 ```cpp
 class Example : public rclcpp::Node {
-  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr example_subscriber_;
-
   Example() : rclcpp::Node{std::string{"Example_node"}} {
-    auto callback = std::bind(&Example::topic_callback, this, std::placeholders::_1);
-    this->example_subscriber_ = create_subscription<sensor_msgs::msg::Joy>(std::string("topic"), 10, callback);
+    auto exampleSubscriber_ = create_subscription<sensor_msgs::msg::Joy>(std::string("topic"), 10, &Example::topicCallback);
   }
 
-  void topic_callback(sensor_msgs::msg::Joy::UniquePtr joy_message) {
+  void topicCallback(sensor_msgs::msg::Joy::UniquePtr joy_message) {
     // callback implementation
   }
 }
 ```
-Note that when we attach the callback function we need to pass in the `this` argument, however we cannot do that explicitly and therefore we must bind a partial function to the callback with `std::bind` to pass in the hidden `this` argument. We add the placeholder variable `std::placeholders::_1` to the callback to allow the message pointer to be passed into our callback function.  
 
 ### Publishers
 In order for information to be communicated to other components of the system, it must first be packaged and sent. This is the role of a publisher. In order to publish a message, you must first create a data structure which defines this message, populate it with the required information and then publish it. An example can be found below.
 
 ```cpp
 class Example : public rclcpp::Node {
-  rclcpp::Publisher<geometry_msgs::msg::String> string_publisher_;
-
   Example() : rclcpp::Node{std::string{"node_name"}} {
-    this->string_publisher_ = create_publisher<geometry_msgs::msg::String>(std::string{"ExampleTopic"}, 10)
+    auto stringPublisher_ = create_publisher<geometry_msgs::msg::String>(std::string{"ExampleTopic"}, 10)
   }
 };
 
 // within some other function / method
-auto string_information = sensor_msgs::msg::String();
+auto stringInformation = sensor_msgs::msg::String();
 // the fields of a particular structure can be found in the "msgs" directory of a "msgs" package if it is a custom message
-string_information.message = std::string("This is some example text that will be sent through a topic");
-string_publisher_->publish(stringInformation);
+stringInformation.message = std::string("This is some example text that will be sent through a topic");
+stringPublisher_->publish(stringInformation);
 ```
 
 ### Timers
@@ -194,12 +186,10 @@ Another method capable of automatically causing some events to be kicked off at 
 #include <chrono>
 
 class Example : public rclcpp::Node {
-  rclcpp::TimerBase::SharedPtr timer_;
-
   Example() : rclcpp::Node{std::string{"Example_node"}} {
-    this->timer_ = create_wall_timer(std::chrono::milliseconds{100},
+    auto timer_ = create_wall_timer(std::chrono::milliseconds{100},
                     [this]() {
-                        // function which implements the regularly occurring task
+                        // function which implements the regularly occuring task
                       }
                     );
   }
@@ -212,45 +202,44 @@ class Example : public rclcpp::Node {
 `joy_node` in the package `joy` is an executable that will interface with an Xbox controller and send inputs as `sensor_msgs::msg::Joy` message to the topic `/joy`. A launch file is provided to redirect the message to `/z0000000/joy`, the launch file will also configure `joy_node` to read from the correct device.
 
 To launch the joystick driver, in the directory you cloned the git repository:
-1. Install the launch script using the command: `. mtrn2500_make`
-2. Launch joy_node using the command: `ros2 launch assignment2 joy_node.py`
-3. A quick way to show message being sent to a topic is use the command `ros2 topic echo /z0000000/joy`. You can check the list of current topic by using the command `ros2 topic list`.
+1. Install the launch script using the command: `colcon build`
+2. Source the assignment package using the command: `source install/setup.bash`
+3. Launch joy_node using the command: `ros2 launch assignment2 joy_node.py`
 
 You can change the topic the `joy` message is redirected to by editing `joy_node.py` and 
 `joy_node_config.yaml` file in the `launch` folder.
 
 
 ## Task 1: Read the joystick (6 marks) 
-This task is handled by the class `JoystickListener` in the header `joystick_listener.hpp`.
+This task is handled by the class `joystick_listener` in the header `joystick_listener.hpp`.
 
- The purpose of this task is to decode the `sensor_msgs::msg::Joy` message from the topic `zxxxxxxx/joy` to get the player actions. Send the player actions as a `geometry_msgs::msg::AccelStamped` message to the topic `/z0000000/acceleration`. i.e. the `JoystickListener` class will convert joystick inputs into acceleration values and publish these to be used by any subsequent nodes.
+ The purpose of this task is to decode the `sensor_msgs::msg::Joy` message from the topic `zxxxxxxx/joy` to get the player actions. Send the player actions as a `geometry_msgs::msg::AccelStamped` message to the topic `/z0000000/acceleration`. i.e. the `joystick_listener` class will convert joystick inputs into acceleration values and publish these to be used by any subsequent nodes.
 
-`JoystickListener` class contains:
-* `joystick_input_` is a `std::shared_ptr` to a subscriber used to listen to `/z0000000/joy`.
+`joystick_listener` class contains:
+* `joystick_input_` is a `std::shared_ptr` to a subcriber used to listen to `/z0000000/joy`.
 * `acceleration_output_` is a `std::shared_ptr` to a publisher used to send the acceleration data to `/z0000000/acceleration`.
 * `zid_` is a string that contains `z0000000`.
 * `config_` is a `joystick_config` struct hold your joystick configuration data.
-* `joy_message_callback` is a method that will be called every time a new message is received by `joystick_input_`, the new message will be passed in as `joy_message` parameter. You need to make sure to register this function when you create `joystick_input_`.
+ * `joy_message_callback` is a method that will be called every time a new message is received by `joystick_input_`, the new message will be passed in as `joy_message` parameter. You need to make sure to register this function when you create `joystick_input_`.
  
-`JoystickConfig` struct is defined in `config_parser.hpp` as:
+`joystick_config` struct is defined in `config_parser.hpp` as:
 ```c++
-struct JoystickConfig
+struct joystick_config
 {
 public:
-    std::size_t speed_plus_axis;
-    std::size_t speed_minus_axis;
-    std::size_t steering_axis;
-    double steering_deadzone;
-    double speed_deadzone;
+	std::size_t speed_plus_axis_; 
+	std::size_t speed_minus_axis_; 
+	std::size_t steering_axis_;
+        double steering_deadzone;
+        double speed_deadzone;
 };
 ```
-
 [`sensor_msgs::msg::Joy`](https://github.com/ros2/common_interfaces/blob/master/sensor_msgs/msg/Joy.msg) contains 
 * `header`
 	* `string frame_id`: `std::string` containing the transform frame with which this data is associated.
 	* `builtin_interfaces/Time stamp`:  Two-integer timestamp that is expressed as seconds and nanoseconds.
 * `float32[] axes`:  `std::vector<float>` containing the axes measurements from a joystick.
-* `int32[] buttons` `std::vector<int32_t>` containing the buttons measurements from a joystick.
+* `int32[] buttons` `std::vecot<int32_t>` containing the buttons measurements from a joystick.
 
 All the other ROS2 message has similar structure. Documentation can be found at [ROS2 common interface](https://github.com/ros2/common_interfaces)
 
@@ -258,27 +247,22 @@ All the other ROS2 message has similar structure. Documentation can be found at 
 ### Subtask A  : Print all axis and buttons status to `std::cout` (2 marks)
 
 In the method `joy_message_callback`:
-1.  use `std::for_each` to iterate through the `axes` vector and print out the value of each axes in a single line. Separate each value with a tab. Format: `0.0\t1.234567\t1.0\t2.0\t...\t\n`.
+1.  use `std::for_each` to iterate through the `axes` vector and print out the value of each axes in a single line. Seperate each value with a tab. Format: `0.0\t1.234567\t1.0\t2.0\t...\t\n`.
 2. Use `std::count` or `std::count_if` to find out how many buttons have been pressed simultaneously. Print the value to `std::cout` in the format: `Total number of buttons pressed is {}.\n`, replace `{}` with total number of buttons pressed.
 
 ### Sub-task B: Calculate linear and angular acceleration inputs (4 marks)
 The axes we will need to read from are defined in `config_` .
-* speed_plus_axis: Positive linear acceleration axis
-* speed_minus_axis: Negative linear acceleration axis
-* steering_axis: Angular acceleration axis
+* speed_plus_axis_: Positive linear acceleration axis value
+* speed_minus_axis_: Negative linear acceleration axis
+* steering_axis_: Angular acceleration axis
 
-An axis could be a trigger or a joystick on the Xbox controller. For example, if we were using a wired Xbox 360 controller:
-* speed_plus_axis = 0: Read from the Left/Right left joystick
-* speed_minus_axis = 1: Read from the Up/Down left joystick
-* steering_axis = 2: Read from the left trigger
-
-The axes mappings for each controller can be found at [ROS Joy Documentation](http://wiki.ros.org/joy)  
+The axis could be a trigger or a joystick on the Xbox controller.
 
 In the method `joy_message_callback`:
 1. Calculate positive linear acceleration. Axis input in the range of [-1.0, 1.0] corresponds to an acceleration output in the range of [0.0, 1.0].
 2. Calculate negative linear acceleration. Axis input in the range of [-1.0, 1.0] corresponds to an acceleration output in the range of [0.0, -1.0].
 3.  Calculate the angular acceleration. Axis input in the range of [-1.0, 1.0] corresponds to an acceleration output in the range of [-1.0, 1.0].
-4. Calculate the net linear acceleration equal to the sum of positive and negative linear acceleration scaled to the range of [-1.0, 1.0].
+4. Calculate the net linear acceleration equal to the sum of positive and negative linear acceleration in the range of [-1.0, 1.0].
 5. Due to the physical design the joystick value may be a small non-zero value at the neutral position. This is known as deadzone. We want to treat those inputs as zero. Treat input within plus or minus deadzone value as zero. Scale the input such that input [deadzone , 1.0] scales to [0.0 , 1.0] and [-deadzone , -1.0] to [0.0, and -1.0], The deadzone value is specified in `config_.speed_deadzone` and `config_.steering_deadzone`. 
 6. Send a `geometry_msgs::msg::AccelStamped` using `publish` method of the publisher pointed by`acceleration_output_`.
 
@@ -289,16 +273,13 @@ The `geometry_msgs::msg::AccelStamped` message should contain:
 * Use `zid` as the `header.frame_id`.
 
 You can check the message by echoing it to the terminal by using the command:
-
 7. `ros2 topic list` 
 8. `ros2 topic echo /z0000000/joy`
 
 ## TASK 2: Velocity and Pose (4.5 marks)
-Calculate the velocity and pose of the vehicle at regular interval using the acceleration input. Velocity is calculated with respect to the vehicle body and pose with respect to the global coordinate frame.
+This task is handled by the class `velocity_kinematic` in the header `velocity_kinematic.hpp`. This class will subscribe to the topic `/z0000000/acceleration` from the previous task and integrate the acceleration to obtain velocity. Periodically send the calculated velocity as a `geometry_msgs::msg::TwistStamped` message to the topic `/z0000000/velocity`.
 
 ### Sub-task A: Calculate linear and angular velocity (1.5 marks)
-This task is handled by the class `VelocityKinematic` in the header `velocity_kinematic.hpp`. This class will subscribe to the topic `/z0000000/acceleration` from the previous task and integrate the acceleration to obtain velocity. Periodically send the calculated velocity as a `geometry_msgs::msg::TwistStamped` message to the topic `/z0000000/velocity`.
-
 1. Assume initial velocities are both zero.
 2. Calculate time difference `dt` between the last time `stamp` and the current time. You can get the current time by calling the function `now()`. Hint: The ROS time class has a method called `seconds()`;
 3. Integrate the velocity at the rate `refresh_period` milliseconds. `refresh_period` is a constructor parameter.
@@ -313,13 +294,12 @@ The `geometry_msgs::msg::TwistStamped` message should contain:
 * Use `zid` as the `header.frame_id`.
 
 ### Sub-task B: Error handling (1.5 marks)
-* Scale the linear and angular acceleration based on `max_linear_acceleration` and `max_angular_acceleration` set in the `kinematic_limits config_`.
 * Limit maximum velocity to based on the plus/minus maximum velocity set in the `kinematic_limits config_`.
 * Do nothing until the first `geometry_msgs::msg::AccelStamped` has been received.
 * If the last velocity message received was older then 10 seconds, consider the communication lost and set the acceleration and velocity to zero. Print "Communication lost.\n" and stop sending `geometry_msgs::msg::TwistStamped` until a new `geometry_msgs::msg::AccelStamped` has been received.
 
 ### Sub-task C: Calculate position and orientation (pose) (1.5 marks)
-This task is handled by the class `PoseKinematic` in the header `pose_kinematic.hpp`. This class will subscribe to the topic `/z0000000/velocity` from the last part and integrate the velocity to get current pose. Periodically send the calculated pose as a `geometry_msgs::msg::PoseStamped` message to the topic `/z0000000/pose`.
+This task is handled by the class `pose_kinematic` in the header `pose_kinematic.hpp`. This class will subscribe to the topic `/z0000000/velocity` from the last part and integrate the velocity to get current pose. Periodically send the calculated pose as a `geometry_msgs::msg::PoseStamped` message to the topic `/z0000000/pose`.
 * Assume starting at the origin (0.0, 0.0) with heading = 0.
 * Calculate time difference between the last time `stamp` and the current time.
 * Convert the velocity to the global coordinate frame using trigonometric functions.
@@ -332,13 +312,13 @@ The `geometry_msgs::msg::PoseStamped` message should contain"
 * Use `zid` as the `header.frame_id`.
 
 ## Task 3: Parse config file (4.5 marks)
-This task is handled by the class `ConfigReader` and `ConfigParser` in the header `config_parser.hpp`. 
+This task is handled by the class `config_reader` and `config_parser` in the header `config_parser.hpp`. 
 
 Read and parse the config file as opposed to using hard-coded configuration parameters. `config_reader` will read in the config file into a `std::unordered_map<std::string,std::string>`, while `config_parse` will convert the result from `config_reader` to actual configurations.
 
 
 ### Sub-task A: Read the config file (1.5 marks)
-This task is handled by the class `ConfigReader` in the header `config_parser.hpp`.
+This task is handled by the class `config_reader` in the header `config_parser.hpp`.
 
 1. Location of the config file will be passed in as a commandline argument. 
 2. Modify the main program to read from a config file instead of `std::cin`.
@@ -346,7 +326,7 @@ This task is handled by the class `ConfigReader` in the header `config_parser.hp
 4. Finish reading the file when an empty line was encounter.
 
 ### Sub-task B: Read the config file (1.5 marks)
-This task is handled by the class `ConfigReader` in the header `config_parser.hpp`.
+This task is handled by the class `config_reader` in the header `config_parser.hpp`.
 
 The config file will be in the format `key : value`.
 All the keys will be unique. Key and value may be surrounded by arbitrary amount of spaces. Each line consist of only a single pair of `key` and `value`.
@@ -357,7 +337,7 @@ All the keys will be unique. Key and value may be surrounded by arbitrary amount
 4. After all the lines have been read, iterate through config_ and print `key` and `value` pairs. Format `key: \"{key}\", value: \"{value}\"\n`. `{}` indicates the position of the value and should be not printed.
 
 ### Sub-task C: Parse the config file (1.5 marks)
-This task is handled by the class `ConfigParser` in the header `config_parser.hpp`.
+This task is handled by the class `config_parser` in the header `config_parser.hpp`.
 
 1. config_parser constructor should read from `config` and initialise all the members.
 ```
@@ -375,8 +355,8 @@ The most important thing with style is to make your code understandable to other
 
 * Follow the course style guide which is based on ROS2 development guide.
 * Neat and tidy code, style is consistent throughout. 
-* Good choice of names that are meaningful. 
-* Good use of functions to split code into manageable segments and avoid code duplication.
+* Good choice of names that is meaningful. 
+* Good use of function to split code into manageable segments and avoid code duplication.
 * Good use of c++ features.
 * Good documentation and comments. 
 * No error or warning message when compiling. 

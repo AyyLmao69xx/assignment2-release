@@ -29,7 +29,7 @@ auto TransformBroadcaster::incoming_callback(
     {
         auto transform_message =
             std::make_unique<geometry_msgs::msg::TransformStamped>();
-        transform_message->header.frame_id = "world_frame";
+        transform_message->header.frame_id = helper::world_frame_name(zid_);
         transform_message->header.stamp = pose_message->header.stamp;
         transform_message->child_frame_id = helper::local_frame_name(zid_);
 
