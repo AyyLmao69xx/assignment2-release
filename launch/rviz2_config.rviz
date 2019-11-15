@@ -48,29 +48,15 @@ Visualization Manager:
       Enabled: true
       Name: Marker
       Namespaces:
-        {}
+        z0000000: true
       Queue Size: 10
       Topic: /z0000000/marker
       Unreliable: false
       Value: true
-    - Class: rviz_default_plugins/TF
-      Enabled: true
-      Frame Timeout: 15
-      Frames:
-        All Enabled: true
-      Marker Scale: 1
-      Name: TF
-      Show Arrows: true
-      Show Axes: true
-      Show Names: false
-      Tree:
-        {}
-      Update Interval: 0
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: z0000000/world_frame
+    Fixed Frame: z0000000/local_frame
     Frame Rate: 30
   Name: root
   Tools:

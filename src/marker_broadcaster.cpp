@@ -23,7 +23,7 @@ MarkerBroadcaster::MarkerBroadcaster(std::string const & zid,
     std::shared_ptr<std::vector<visualization_msgs::msg::Marker>> shape_list)
     : rclcpp::Node{helper::marker_node_name(zid)}
     , marker_publisher_{create_publisher<visualization_msgs::msg::Marker>(
-          marker_topic(zid), 10)}
+          marker_topic(zid))}
     , timer_{create_wall_timer(
           refresh_period, [this]() -> void { marker_publisher_callback(); })}
     , shape_list_{std::move(shape_list)}

@@ -85,29 +85,36 @@ auto main(int argc, char * argv[]) -> int
         auto ros_worker = rclcpp::executors::SingleThreadedExecutor{};
 
         // Read config from std::in.
-        // TODO(student) code here.
-        auto const config_strings = assignment2::ConfigReader{std::cin};
+        std::ifstream config_input(argv[1]);
+        std::istream & config_file = config_input;
+
+        auto const config_strings = assignment2::ConfigReader{config_file};
+        std::ifstream config_input(argv[1]);
+        std::istream & config_file = config_input;
+
+        auto const config_strings = assignment2::ConfigReader{config_file};
+
         auto const config = assignment2::ConfigParser{config_strings};
 
         // Creating all the nodes we need and register with executor that will
         // service those nodes.
         auto input_node = std::make_shared<assignment2::JoystickListener>(
-            "z0000000", config.get_joystick_config());
+            "z5165194", config.get_joystick_config());
         ros_worker.add_node(input_node);
 
         auto velocity_node = std::make_shared<assignment2::VelocityKinematic>(
-            "z0000000", 200ms, config.get_kinematic_config());
+            "z5165194", 200ms, config.get_kinematic_config());
         ros_worker.add_node(velocity_node);
 
         auto pose_node =
-            std::make_shared<assignment2::PoseKinematic>("z0000000", 100ms);
+            std::make_shared<assignment2::PoseKinematic>("z5165194", 100ms);
         ros_worker.add_node(pose_node);
 
-        auto visual_node = create_visualisation_node("z0000000", 100ms);
+        auto visual_node = create_visualisation_node("z5165194", 100ms);
         ros_worker.add_node(visual_node);
 
         auto transform_node =
-            std::make_shared<assignment2::TransformBroadcaster>("z0000000");
+            std::make_shared<assignment2::TransformBroadcaster>("z5165194");
         ros_worker.add_node(transform_node);
 
         // Run the executor, nodes take turns working.

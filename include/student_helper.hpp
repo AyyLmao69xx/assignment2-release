@@ -31,11 +31,11 @@ auto constexpr pose_node_name = [](std::string const & zid) {
 };
 
 auto constexpr marker_node_name = [](std::string const & zid) {
-    return zid + "_marker_node";
+    return zid + "_pose_node";
 };
 
 auto constexpr transform_node_name = [](std::string const & zid) {
-    return zid + "_transform_node";
+    return zid + "_pose_node";
 };
 
 } // namespace helper
